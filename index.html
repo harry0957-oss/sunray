@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sunray Roadmap Builder</title>
+  <style>
+    :root {
+      --app-bg: #071018;
+      --panel-bg: #101922;
+      --panel-text: #f5f8fc;
+      --panel-muted: #a7b5c8;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--app-bg);
+      color: var(--panel-text);
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 16px;
+      min-height: 100vh;
+      padding: 14px;
+      background: var(--app-bg);
+    }
+
+    .controls {
+      background: linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.025)), var(--panel-bg);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      padding: 16px;
+      max-height: calc(100vh - 28px);
+      overflow: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.36);
+      color: var(--panel-text);
+    }
+
+    .stage {
+      position: relative;
+      min-height: calc(100vh - 28px);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius);
+      background: #071018;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), 0 20px 60px rgba(0,0,0,0.36);
+    }
+
+    h1, h2, h3 { margin: 0; }
+    .controls h2 { font-size: 18px; margin-bottom: 6px; }
+    .controls p { margin: 0 0 14px; color: var(--panel-muted); font-size: 12px; line-height: 1.45; }
+    .section { border-top: 1px solid rgba(255,255,255,0.09); padding-top: 13px; margin-top: 13px; }
+
+    label { display: block; font-size: 11px; color: var(--panel-muted); margin: 9px 0 5px; }
+
+    input, select, textarea, button {
+      width: 100%;
+      border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(3, 10, 18, 0.72);
+      color: var(--panel-text);
+      padding: 9px 10px;
+      font: inherit;
+      font-size: 12px;
+      outline: none;
+    }
+
+    textarea { min-height: 92px; resize: vertical; line-height: 1.35; }
+    input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
+    input[type="checkbox"] { width: auto; transform: translateY(2px); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+    .checkline { display: flex; gap: 8px; align-items: center; color: var(--panel-muted); font-size: 12px; margin-top: 10px; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 11px; }
+
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, #1778ff, #29d3ff);
+      border: 0;
+      color: #00111f;
+      font-weight: 850;
+    }
+
+    button.secondary {
+      background: rgba(255,255,255,0.08);
+      color: var(--panel-text);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .project-list { display: grid; gap: 8px; margin-top: 12px; }
+    .project-chip {
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 13px;
+      padding: 9px;
+      display: grid;
+      grid-template-columns: 1fr 56px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+    }
+    .project-chip small { display: block; color: var(--panel-muted); margin-top: 3px; }
+    .chip-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .chip-actions button { height: 28px; padding: 0; border-radius: 9px; font-size: 11px; }
+    .chip-actions .edit { background: rgba(55,166,255,0.18); color: #cdeaff; border: 1px solid rgba(55,166,255,0.32); }
+    .chip-actions .delete { background: rgba(255,84,112,0.18); color: #ffd7df; border: 1px solid rgba(255,84,112,0.32); }
+
+    .help { font-size: 11px; color: var(--panel-muted); line-height: 1.4; background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; padding: 9px; margin-top: 10px; }
+    #chart { width: 100%; height: 100%; display: block; }
+
+    .tooltip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      background: rgba(5, 12, 20, 0.96);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 13px;
+      padding: 9px 11px;
+      max-width: 260px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+      font-size: 12px;
+      line-height: 1.35;
+      z-index: 2;
+    }
+    .tooltip strong { font-size: 13px; }
+
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 1fr; }
+      .controls { max-height: none; }
+      .stage { min-height: 720px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="controls">
+      <h2>Sunray Roadmap Builder</h2>
+      <p>Category controls the lane. Date can automatically place the project in the right phase. Click Edit on an existing project to update it.</p>
+
+      <label>Title</label>
+      <input id="titleInput" value="5 Year Transformation Map" />
+      <label>Subtitle</label>
+      <input id="subtitleInput" value="From current state to measurable future state" />
+      <label>Left Side / Current State Label</label>
+      <input id="currentInput" value="Current State" />
+      <label>Future State</label>
+      <input id="futureInput" value="Future State" />
+
+      <div class="section">
+        <h3>Diagram Colours</h3>
+        <div class="grid2">
+          <div><label>Background</label><input id="bgInput" type="color" value="#071018" /></div>
+          <div><label>Text</label><input id="textInput" type="color" value="#ffffff" /></div>
+          <div><label>Date Text</label><input id="dateInput" type="color" value="#d7e4f4" /></div>
+          <div><label>Future Sun</label><input id="sunInput" type="color" value="#2f9bff" /></div>
+        </div>
+        <div class="grid2">
+          <div><label>Category 1</label><input id="c1Input" type="color" value="#a855f7" /></div>
+          <div><label>Category 2</label><input id="c2Input" type="color" value="#38bdf8" /></div>
+          <div><label>Category 3</label><input id="c3Input" type="color" value="#34d399" /></div>
+          <div><label>Category 4</label><input id="c4Input" type="color" value="#facc15" /></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Text Style</h3>
+        <div class="grid3">
+          <div><label>Project Font</label><input id="projectFontInput" type="number" min="8" max="22" value="11" /></div>
+          <div><label>Date Font</label><input id="dateFontInput" type="number" min="7" max="18" value="9.5" step="0.5" /></div>
+          <div><label>Title Font</label><input id="titleFontInput" type="number" min="20" max="60" value="38" /></div>
+        </div>
+        <label class="checkline"><input id="projectBoldInput" type="checkbox" /> Bold project names</label>
+        <label class="checkline"><input id="dateBoldInput" type="checkbox" /> Bold dates</label>
+        <label class="checkline"><input id="autoPhaseInput" type="checkbox" checked /> Auto-place phase from expected date</label>
+        <label>Base FY for Year 1</label>
+        <input id="baseFyInput" type="number" min="0" max="99" value="26" />
+      </div>
+
+      <div class="section">
+        <h3>Category Names</h3>
+        <label>Category 1</label><input id="cat1Input" value="End User Compute" />
+        <label>Category 2</label><input id="cat2Input" value="Process Automation" />
+        <label>Category 3</label><input id="cat3Input" value="Platform & Operations" />
+        <label>Category 4</label><input id="cat4Input" value="Customer Value" />
+      </div>
+
+      <div class="section">
+        <h3>Phase Names</h3>
+        <label>Phases 1 to 6, one per line</label>
+        <textarea id="phaseInput">Year 1 Foundation
+Year 2 Build Momentum
+Year 3 Scale Impact
+Year 4 Optimise
+Year 5 Lead & Sustain
+Future State</textarea>
+      </div>
+
+      <div class="section">
+        <h3 id="projectFormTitle">Add Project</h3>
+        <label>Project Name</label><input id="projectName" placeholder="e.g. AI Bootcamps" />
+        <div class="grid2">
+          <div><label>Category</label><select id="projectCategory"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+          <div><label>Phase</label><select id="projectPhase"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
+        </div>
+        <label>Expected Date</label><input id="projectDate" placeholder="e.g. Q2 FY27" />
+        <label>Notes</label><input id="projectNotes" placeholder="Optional hover tooltip" />
+        <div class="btn-row"><button id="addProjectBtn">Add Project</button><button class="secondary" id="cancelEditBtn" style="display:none;">Cancel Edit</button></div>
+        <div class="btn-row"><button class="secondary" id="resetBtn">Reset Sample</button><button class="secondary" id="clearFormBtn">Clear Form</button></div>
+        <div class="help">Auto-place reads FY from the Expected Date. Base FY 26 means FY26 = Year 1, FY27 = Year 2, FY28 = Year 3, FY29 = Year 4, FY30 = Year 5.</div>
+        <div class="project-list" id="projectList"></div>
+      </div>
+
+      <div class="section">
+        <h3>Export / Import JSON</h3>
+        <label>Data JSON</label><textarea id="jsonBox"></textarea>
+        <div class="btn-row"><button class="secondary" id="copyJsonBtn">Refresh JSON</button><button class="secondary" id="loadJsonBtn">Load JSON</button></div>
+      </div>
+    </aside>
+
+    <main class="stage" id="stage">
+      <svg id="chart" viewBox="0 0 1700 1080" role="img" aria-label="Configurable sunray transformation roadmap"></svg>
+      <div class="tooltip" id="tooltip"></div>
+    </main>
+  </div>
+
+  <script>
+    const sampleProjects = [
+      { name: "Culture & Change Strategy", category: 1, phase: 1, date: "Q1 FY26", notes: "Create leadership narrative and adoption plan." },
+      { name: "Leadership Capability", category: 1, phase: 1, date: "Q4 FY26", notes: "Enable leaders to sponsor and measure change." },
+      { name: "Upskill & Reskill Workforce", category: 1, phase: 2, date: "Q3 FY27", notes: "Role-based training and practical playbooks." },
+      { name: "High Performing Teams", category: 1, phase: 3, date: "Q2 FY28", notes: "Embedded champions and measurable usage." },
+      { name: "Technology Assessment", category: 2, phase: 1, date: "Q2 FY26", notes: "Current-state discovery and readiness assessment." },
+      { name: "Cloud Migration", category: 2, phase: 2, date: "Q1 FY27", notes: "Modernise platforms and reduce technical debt." },
+      { name: "Data Platform Modernisation", category: 2, phase: 2, date: "Q3 FY27", notes: "Analytics-ready governed data platform." },
+      { name: "AI & Automation Enablement", category: 2, phase: 3, date: "Q2 FY28", notes: "Operationalise AI and automation safely." },
+      { name: "Process Assessment", category: 3, phase: 1, date: "Q2 FY26", notes: "Prioritise automation candidates and blockers." },
+      { name: "Operating Model Design", category: 3, phase: 1, date: "Q4 FY26", notes: "Define ownership, service model and governance." },
+      { name: "Workflow Automation", category: 3, phase: 2, date: "Q2 FY27", notes: "Automate repeatable high-friction processes." },
+      { name: "Optimised Operations", category: 3, phase: 3, date: "Q2 FY28", notes: "Measure cycle-time and quality improvements." },
+      { name: "Customer Insights & Research", category: 4, phase: 1, date: "Q1 FY26", notes: "Understand customer needs and experience gaps." },
+      { name: "Experience Enhancements", category: 4, phase: 1, date: "Q3 FY26", notes: "Improve key journeys and touchpoints." },
+      { name: "Product / Service Innovation", category: 4, phase: 2, date: "Q3 FY27", notes: "Launch improvements linked to business value." },
+      { name: "Customer Loyalty & Advocacy", category: 4, phase: 4, date: "Q2 FY29", notes: "Drive retention, advocacy and measurable value." }
+    ];
+
+    let projects = JSON.parse(JSON.stringify(sampleProjects));
+    let editingIndex = -1;
+
+    const els = {
+      chart: document.getElementById("chart"), stage: document.getElementById("stage"), tooltip: document.getElementById("tooltip"),
+      title: document.getElementById("titleInput"), subtitle: document.getElementById("subtitleInput"), current: document.getElementById("currentInput"), future: document.getElementById("futureInput"),
+      bg: document.getElementById("bgInput"), text: document.getElementById("textInput"), date: document.getElementById("dateInput"), sun: document.getElementById("sunInput"),
+      c1: document.getElementById("c1Input"), c2: document.getElementById("c2Input"), c3: document.getElementById("c3Input"), c4: document.getElementById("c4Input"),
+      projectFont: document.getElementById("projectFontInput"), dateFont: document.getElementById("dateFontInput"), titleFont: document.getElementById("titleFontInput"), projectBold: document.getElementById("projectBoldInput"), dateBold: document.getElementById("dateBoldInput"), autoPhase: document.getElementById("autoPhaseInput"), baseFy: document.getElementById("baseFyInput"),
+      cat1: document.getElementById("cat1Input"), cat2: document.getElementById("cat2Input"), cat3: document.getElementById("cat3Input"), cat4: document.getElementById("cat4Input"),
+      phaseInput: document.getElementById("phaseInput"), projectFormTitle: document.getElementById("projectFormTitle"), projectName: document.getElementById("projectName"), projectCategory: document.getElementById("projectCategory"), projectPhase: document.getElementById("projectPhase"), projectDate: document.getElementById("projectDate"), projectNotes: document.getElementById("projectNotes"),
+      addProjectBtn: document.getElementById("addProjectBtn"), cancelEditBtn: document.getElementById("cancelEditBtn"), clearFormBtn: document.getElementById("clearFormBtn"), resetBtn: document.getElementById("resetBtn"), projectList: document.getElementById("projectList"), jsonBox: document.getElementById("jsonBox"), copyJsonBtn: document.getElementById("copyJsonBtn"), loadJsonBtn: document.getElementById("loadJsonBtn")
+    };
+
+    function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+    function polar(cx, cy, r, deg) { const rad = (Math.PI / 180) * deg; return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }; }
+    function arcPath(cx, cy, r, startDeg, endDeg) { const s = polar(cx, cy, r, startDeg), e = polar(cx, cy, r, endDeg); const largeArc = Math.abs(endDeg - startDeg) <= 180 ? 0 : 1; const sweep = endDeg > startDeg ? 1 : 0; return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} ${sweep} ${e.x} ${e.y}`; }
+    function bandPath(cx, cy, rInner, rOuter, a1, a2) { const p1 = polar(cx, cy, rOuter, a1), p2 = polar(cx, cy, rOuter, a2), p3 = polar(cx, cy, rInner, a2), p4 = polar(cx, cy, rInner, a1); const largeArc = Math.abs(a2 - a1) <= 180 ? 0 : 1; return `M ${p1.x} ${p1.y} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${rInner} ${rInner} 0 ${largeArc} 0 ${p4.x} ${p4.y} Z`; }
+
+    function wrapText(text, maxChars, maxLines) {
+      const words = String(text || "").split(/\s+/); const lines = []; let line = "";
+      words.forEach(word => { if ((line + " " + word).trim().length > maxChars) { if (line) lines.push(line); line = word; } else line = (line + " " + word).trim(); });
+      if (line) lines.push(line); return lines.slice(0, maxLines || 3);
+    }
+
+    function phaseFromDate(dateText, baseFy, fallbackPhase) {
+      const text = String(dateText || "").toUpperCase();
+      const fyMatch = text.match(/FY\s*([0-9]{2,4})/);
+      const yearMatch = text.match(/(^|[^0-9])(20[0-9]{2})([^0-9]|$)/);
+      const matchValue = fyMatch ? fyMatch[1] : (yearMatch ? yearMatch[2] : null);
+      if (!matchValue) return clamp(Number(fallbackPhase) || 1, 1, 6);
+      let fy = Number(matchValue);
+      if (fy >= 2000) fy = fy % 100;
+      const baseRaw = Number(baseFy || 26);
+      const base = baseRaw >= 2000 ? baseRaw % 100 : baseRaw;
+      return clamp((fy - base) + 1, 1, 6);
+    }
+
+    function getConfig() {
+      return {
+        title: els.title.value.trim() || "Transformation Map", subtitle: els.subtitle.value.trim(), currentState: els.current.value.trim() || "Current State", futureState: els.future.value.trim() || "Future State",
+        background: els.bg.value, textColour: els.text.value, dateColour: els.date.value, sun: els.sun.value,
+        projectFont: Number(els.projectFont.value || 11), dateFont: Number(els.dateFont.value || 9.5), titleFont: Number(els.titleFont.value || 38), projectBold: els.projectBold.checked, dateBold: els.dateBold.checked, autoPhase: els.autoPhase.checked, baseFy: Number(els.baseFy.value || 26),
+        categories: [els.cat1.value, els.cat2.value, els.cat3.value, els.cat4.value], colours: [els.c1.value, els.c2.value, els.c3.value, els.c4.value], phases: els.phaseInput.value.split("\n").map(x => x.trim()).filter(Boolean).slice(0, 6)
+      };
+    }
+
+    function effectivePhase(project, cfg) { return cfg.autoPhase ? phaseFromDate(project.date, cfg.baseFy, project.phase) : clamp(Number(project.phase) || 1, 1, 6); }
+
+    function clearProjectForm() {
+      editingIndex = -1;
+      els.projectFormTitle.textContent = "Add Project";
+      els.projectName.value = "";
+      els.projectCategory.value = "1";
+      els.projectPhase.value = "1";
+      els.projectDate.value = "";
+      els.projectNotes.value = "";
+      els.addProjectBtn.textContent = "Add Project";
+      els.cancelEditBtn.style.display = "none";
+    }
+
+    function loadProjectIntoForm(index) {
+      const project = projects[index];
+      if (!project) return;
+      editingIndex = index;
+      els.projectFormTitle.textContent = "Edit Project";
+      els.projectName.value = project.name || "";
+      els.projectCategory.value = String(project.category || 1);
+      els.projectPhase.value = String(project.phase || 1);
+      els.projectDate.value = project.date || "";
+      els.projectNotes.value = project.notes || "";
+      els.addProjectBtn.textContent = "Update Project";
+      els.cancelEditBtn.style.display = "block";
+    }
+
+    function syncPhaseFromDateField() {
+      const cfg = getConfig();
+      if (!cfg.autoPhase) return;
+      els.projectPhase.value = String(phaseFromDate(els.projectDate.value, cfg.baseFy, els.projectPhase.value));
+    }
+
+    function render() {
+      const cfg = getConfig();
+      els.stage.style.background = cfg.background;
+      els.chart.innerHTML = "";
+      const NS = "http://www.w3.org/2000/svg";
+      const add = (name, attrs, parent) => { const el = document.createElementNS(NS, name); Object.entries(attrs || {}).forEach(([k, v]) => el.setAttribute(k, v)); (parent || els.chart).appendChild(el); return el; };
+
+      const defs = add("defs");
+      const glow = add("filter", { id: "glow", x: "-80%", y: "-80%", width: "260%", height: "260%" }, defs);
+      add("feGaussianBlur", { stdDeviation: "5", result: "blur" }, glow); const merge = add("feMerge", {}, glow); add("feMergeNode", { in: "blur" }, merge); add("feMergeNode", { in: "SourceGraphic" }, merge);
+
+      const bgGrad = add("radialGradient", { id: "bgGrad", cx: "83%", cy: "10%", r: "95%" }, defs);
+      add("stop", { offset: "0%", "stop-color": cfg.sun, "stop-opacity": "0.20" }, bgGrad); add("stop", { offset: "58%", "stop-color": cfg.background, "stop-opacity": "0.93" }, bgGrad); add("stop", { offset: "100%", "stop-color": cfg.background, "stop-opacity": "1" }, bgGrad);
+
+      cfg.colours.forEach((colour, idx) => { const grad = add("linearGradient", { id: `laneGrad${idx}`, x1: "0%", y1: "55%", x2: "100%", y2: "0%" }, defs); add("stop", { offset: "0%", "stop-color": colour, "stop-opacity": "0.10" }, grad); add("stop", { offset: "68%", "stop-color": colour, "stop-opacity": "0.28" }, grad); add("stop", { offset: "100%", "stop-color": colour, "stop-opacity": "0.50" }, grad); });
+
+      add("rect", { width: "1700", height: "1080", fill: "url(#bgGrad)" });
+      add("text", { x: 66, y: 76, fill: cfg.textColour, "font-size": cfg.titleFont, "font-weight": "900", "letter-spacing": "0.1" }).textContent = cfg.title;
+      if (cfg.subtitle) add("text", { x: 68, y: 112, fill: cfg.textColour, opacity: "0.72", "font-size": "18" }).textContent = cfg.subtitle;
+
+      const clip = add("clipPath", { id: "diagramClip" }, defs); add("rect", { x: "250", y: "120", width: "1265", height: "710" }, clip);
+      const mapG = add("g", { transform: "translate(0,0)", "clip-path": "url(#diagramClip)" }); const overlayG = add("g", { transform: "translate(0,0)" });
+
+      const fx = 1450, fy = 315, startAngle = 187, endAngle = 156, laneCount = 4, phaseCount = 6, minR = 90, maxR = 1095, step = (maxR - minR) / phaseCount, axisAngle = 180;
+      const midAngle = startAngle + (endAngle - startAngle) / 2;
+      const rayOrigin = polar(fx, fy, minR, midAngle);
+
+      for (let i = 0; i < laneCount; i++) { const a1 = startAngle + (i * (endAngle - startAngle) / laneCount); const a2 = startAngle + ((i + 1) * (endAngle - startAngle) / laneCount); add("path", { d: bandPath(fx, fy, minR, maxR, a1, a2), fill: `url(#laneGrad${i})`, stroke: cfg.colours[i], "stroke-opacity": "0.14", "stroke-width": "0.6" }, mapG); }
+      for (let p = 1; p <= phaseCount; p++) { const r = minR + p * step; const opacity = Math.max(0.10, 0.44 - p * 0.05); add("path", { d: arcPath(fx, fy, r, startAngle, endAngle), fill: "none", stroke: `rgba(168,85,247,${opacity})`, "stroke-width": p === phaseCount ? "1.35" : "1", "stroke-dasharray": p === phaseCount ? "" : "6 9" }, mapG); }
+      for (let i = 0; i <= laneCount; i++) { const a = startAngle + i * (endAngle - startAngle) / laneCount; const p1 = polar(fx, fy, minR, a), p2 = polar(fx, fy, maxR, a); add("line", { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, stroke: "rgba(255,255,255,0.13)", "stroke-width": "0.8" }, mapG); }
+
+      add("circle", { cx: fx, cy: fy, r: 58, fill: "rgba(9,13,36,0.98)", stroke: cfg.sun, "stroke-width": "4", filter: "url(#glow)" }, overlayG);
+      wrapText(cfg.futureState.toUpperCase(), 13, 3).forEach((line, idx, arr) => { add("text", { x: fx, y: fy - ((arr.length - 1) * 10) + idx * 21, fill: "white", "font-size": "15", "font-weight": "900", "text-anchor": "middle" }, overlayG).textContent = line; });
+
+      const currentX = 250, currentY = 485;
+      add("line", { x1: currentX, y1: 170, x2: currentX, y2: 790, stroke: cfg.textColour, opacity: "0.32", "stroke-width": "1.5" }, overlayG);
+      const currentLabelX = currentX - 18;
+      add("text", { x: currentLabelX, y: currentY, fill: cfg.textColour, opacity: "0.76", "font-size": "13", "font-weight": "850", "text-anchor": "middle", transform: `rotate(-90 ${currentLabelX} ${currentY})` }, overlayG).textContent = cfg.currentState.toUpperCase();
+
+      cfg.categories.forEach((cat, i) => {
+        const a = startAngle + (i + 0.5) * (endAngle - startAngle) / laneCount;
+        const pt = polar(fx, fy, maxR + 8, a);
+        const labelY = pt.y;
+        add("text", { x: currentX - 92, y: labelY + 5, fill: cfg.colours[i], "font-size": "13", "font-weight": "850", "text-anchor": "end" }, overlayG).textContent = cat.toUpperCase();
+        add("circle", { cx: currentX - 72, cy: labelY, r: 8, fill: cfg.colours[i], opacity: "0.96" }, overlayG);
+      });
+
+      const axisG = add("g", { transform: "translate(0,0)" }, overlayG);
+      for (let p = 1; p <= phaseCount; p++) { const r = minR + (phaseCount - p + 0.5) * step; const axisPt = polar(fx, fy, r, axisAngle); const x = axisPt.x; add("line", { x1: x, y1: 840, x2: x, y2: 874, stroke: cfg.textColour, opacity: "0.12", "stroke-dasharray": "3 5" }, axisG); add("circle", { cx: x, cy: 838, r: 4, fill: cfg.background, stroke: cfg.sun, "stroke-opacity": "0.65" }, axisG); const phaseLabel = cfg.phases[p - 1] || `Phase ${p}`; wrapText(phaseLabel, 13, 2).forEach((line, idx) => add("text", { x, y: 864 + idx * 14, fill: cfg.sun, "font-size": "10.5", "font-weight": "800", "text-anchor": "middle" }, axisG).textContent = line.toUpperCase()); }
+
+      const grouped = new Map();
+      projects.forEach((project) => { const ep = effectivePhase(project, cfg); project._effectivePhase = ep; const key = `${project.category}-${ep}`; if (!grouped.has(key)) grouped.set(key, []); grouped.get(key).push(project); });
+      grouped.forEach((items) => { items.forEach((project, idx) => { project._offsetIndex = idx; project._offsetCount = items.length; }); });
+
+      projects.forEach((project) => {
+        const categoryIndex = clamp(Number(project.category) || 1, 1, 4) - 1;
+        const phase = effectivePhase(project, cfg);
+        const colour = cfg.colours[categoryIndex];
+        const laneStart = startAngle + categoryIndex * (endAngle - startAngle) / laneCount;
+        const laneEnd = startAngle + (categoryIndex + 1) * (endAngle - startAngle) / laneCount;
+        const spread = Math.min(5.6, Math.abs(laneEnd - laneStart) * 0.58);
+        const centredIndex = (project._offsetIndex || 0) - ((project._offsetCount || 1) - 1) / 2;
+        const angle = laneStart + (laneEnd - laneStart) * 0.5 + centredIndex * spread;
+        const r = minR + (phaseCount - phase + 0.5) * step + centredIndex * 10;
+        const pt = polar(fx, fy, r, angle);
+
+        add("line", { x1: rayOrigin.x, y1: rayOrigin.y, x2: pt.x, y2: pt.y, stroke: "rgba(255,255,255,0.28)", "stroke-width": "0.9" }, mapG);
+        const dot = add("circle", { cx: pt.x, cy: pt.y, r: 8, fill: colour, stroke: "white", "stroke-width": "1.1", filter: "url(#glow)", tabindex: "0" }, mapG);
+        dot.addEventListener("mousemove", e => showTooltip(e, project, cfg.categories[categoryIndex], phase));
+        dot.addEventListener("mouseleave", hideTooltip);
+
+        const toRight = pt.x < 1260;
+        const labelX = toRight ? pt.x + 15 : pt.x - 15;
+        const anchor = toRight ? "start" : "end";
+        const lineHeight = cfg.projectFont + 2;
+        const nameLines = wrapText(project.name, 18, 2);
+        const totalTextHeight = (nameLines.length * lineHeight) + cfg.dateFont + 2;
+        const firstLineY = pt.y - (totalTextHeight / 2) + cfg.projectFont;
+        nameLines.forEach((line, idx) => add("text", { x: labelX, y: firstLineY + idx * lineHeight, fill: cfg.textColour, opacity: "0.94", "font-size": cfg.projectFont, "font-weight": cfg.projectBold ? "850" : "500", "text-anchor": anchor }, mapG).textContent = line);
+        add("text", { x: labelX, y: firstLineY + nameLines.length * lineHeight + 1, fill: cfg.textColour, opacity: "0.78", "font-size": cfg.dateFont, "font-weight": cfg.dateBold ? "850" : "500", "text-anchor": anchor }, mapG).textContent = project.date || `Phase ${phase}`;
+      });
+
+      updateProjectList(); updateJsonBox();
+    }
+
+    function showTooltip(e, project, categoryName, phase) { els.tooltip.style.display = "block"; els.tooltip.style.left = `${e.clientX - els.stage.getBoundingClientRect().left + 12}px`; els.tooltip.style.top = `${e.clientY - els.stage.getBoundingClientRect().top + 12}px`; els.tooltip.innerHTML = `<strong>${project.name}</strong><br>Category: ${categoryName}<br>Phase: ${phase}<br>Date: ${project.date || "Not set"}${project.notes ? `<br><br>${project.notes}` : ""}`; }
+    function hideTooltip() { els.tooltip.style.display = "none"; }
+
+    function updateProjectList() {
+      const cfg = getConfig();
+      els.projectList.innerHTML = "";
+      projects.forEach((project, idx) => {
+        const chip = document.createElement("div"); chip.className = "project-chip";
+        const text = document.createElement("div"); const shownPhase = effectivePhase(project, cfg);
+        text.innerHTML = `<strong>${project.name}</strong><small>Category ${project.category} · Phase ${shownPhase}${cfg.autoPhase ? " auto" : ""} · ${project.date || "No date"}</small>`;
+        text.style.cursor = "pointer"; text.title = "Click to edit"; text.addEventListener("click", () => loadProjectIntoForm(idx));
+        const actions = document.createElement("div"); actions.className = "chip-actions";
+        const edit = document.createElement("button"); edit.className = "edit"; edit.textContent = "✎"; edit.title = "Edit project"; edit.addEventListener("click", () => loadProjectIntoForm(idx));
+        const del = document.createElement("button"); del.className = "delete"; del.textContent = "×"; del.title = "Remove project"; del.addEventListener("click", () => { projects.splice(idx, 1); if (editingIndex === idx) clearProjectForm(); if (editingIndex > idx) editingIndex -= 1; render(); });
+        actions.appendChild(edit); actions.appendChild(del); chip.appendChild(text); chip.appendChild(actions); els.projectList.appendChild(chip);
+      });
+    }
+
+    function getState() { const cfg = getConfig(); return { ...cfg, projects }; }
+    function updateJsonBox() { els.jsonBox.value = JSON.stringify(getState(), null, 2); }
+    function loadState(data) {
+      els.title.value = data.title || els.title.value; els.subtitle.value = data.subtitle || ""; els.current.value = data.currentState || data.current || els.current.value; els.future.value = data.futureState || els.future.value;
+      els.bg.value = data.background || els.bg.value; els.text.value = data.textColour || els.text.value; els.date.value = data.dateColour || els.date.value; els.sun.value = data.sun || els.sun.value;
+      els.projectFont.value = data.projectFont || els.projectFont.value; els.dateFont.value = data.dateFont || els.dateFont.value; els.titleFont.value = data.titleFont || els.titleFont.value;
+      els.projectBold.checked = !!data.projectBold; els.dateBold.checked = !!data.dateBold; els.autoPhase.checked = data.autoPhase !== undefined ? !!data.autoPhase : els.autoPhase.checked; els.baseFy.value = data.baseFy || els.baseFy.value;
+      if (Array.isArray(data.categories)) [els.cat1, els.cat2, els.cat3, els.cat4].forEach((el, i) => el.value = data.categories[i] || el.value);
+      if (Array.isArray(data.colours)) [els.c1, els.c2, els.c3, els.c4].forEach((el, i) => el.value = data.colours[i] || el.value);
+      if (Array.isArray(data.phases)) els.phaseInput.value = data.phases.slice(0, 6).join("\n");
+      if (Array.isArray(data.projects)) projects = data.projects;
+      clearProjectForm(); render();
+    }
+
+    function saveProjectFromForm() {
+      const name = els.projectName.value.trim(); if (!name) return;
+      const cfg = getConfig(); const date = els.projectDate.value.trim();
+      const project = { name, category: Number(els.projectCategory.value), phase: cfg.autoPhase ? phaseFromDate(date, cfg.baseFy, els.projectPhase.value) : Number(els.projectPhase.value), date, notes: els.projectNotes.value.trim() };
+      if (editingIndex >= 0) projects[editingIndex] = project; else projects.push(project);
+      clearProjectForm(); render();
+    }
+
+    els.addProjectBtn.addEventListener("click", saveProjectFromForm);
+    els.cancelEditBtn.addEventListener("click", clearProjectForm);
+    els.clearFormBtn.addEventListener("click", clearProjectForm);
+    els.resetBtn.addEventListener("click", () => { projects = JSON.parse(JSON.stringify(sampleProjects)); clearProjectForm(); render(); });
+    els.copyJsonBtn.addEventListener("click", updateJsonBox);
+    els.loadJsonBtn.addEventListener("click", () => { try { loadState(JSON.parse(els.jsonBox.value)); } catch (err) { alert("That JSON could not be loaded. Check commas, brackets and quote marks."); } });
+
+    [els.title, els.subtitle, els.current, els.future, els.bg, els.text, els.date, els.sun, els.c1, els.c2, els.c3, els.c4, els.projectFont, els.dateFont, els.titleFont, els.projectBold, els.dateBold, els.autoPhase, els.baseFy, els.cat1, els.cat2, els.cat3, els.cat4, els.phaseInput].forEach(el => el.addEventListener("input", render));
+    [els.projectBold, els.dateBold, els.autoPhase].forEach(el => el.addEventListener("change", render));
+    [els.projectDate, els.baseFy, els.autoPhase].forEach(el => el.addEventListener("input", syncPhaseFromDateField));
+    els.projectDate.addEventListener("change", syncPhaseFromDateField);
+
+    render();
+  </script>
+</body>
+</html>
