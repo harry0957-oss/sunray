@@ -175,6 +175,7 @@
           <div><label>Project Font</label><input id="projectFontInput" type="number" min="8" max="22" value="11" /></div>
           <div><label>Date Font</label><input id="dateFontInput" type="number" min="7" max="18" value="9.5" step="0.5" /></div>
           <div><label>Title Font</label><input id="titleFontInput" type="number" min="20" max="60" value="38" /></div>
+          <div><label>Category Font</label><input id="categoryFontInput" type="number" min="8" max="24" value="11" /></div>
         </div>
         <label class="checkline"><input id="projectBoldInput" type="checkbox" /> Bold project names</label>
         <label class="checkline"><input id="dateBoldInput" type="checkbox" /> Bold dates</label>
@@ -221,6 +222,7 @@ Future State</textarea>
         <h3>Export / Import JSON</h3>
         <label>Data JSON</label><textarea id="jsonBox"></textarea>
         <div class="btn-row"><button class="secondary" id="copyJsonBtn">Refresh JSON</button><button class="secondary" id="loadJsonBtn">Load JSON</button></div>
+        <div class="btn-row"><button class="secondary" id="exportJpegBtn">Export JPEG</button><button class="secondary" id="exportSvgBtn">Export SVG</button></div>
       </div>
     </aside>
 
@@ -258,10 +260,10 @@ Future State</textarea>
       title: document.getElementById("titleInput"), subtitle: document.getElementById("subtitleInput"), current: document.getElementById("currentInput"), future: document.getElementById("futureInput"),
       bg: document.getElementById("bgInput"), text: document.getElementById("textInput"), date: document.getElementById("dateInput"), sun: document.getElementById("sunInput"),
       c1: document.getElementById("c1Input"), c2: document.getElementById("c2Input"), c3: document.getElementById("c3Input"), c4: document.getElementById("c4Input"),
-      projectFont: document.getElementById("projectFontInput"), dateFont: document.getElementById("dateFontInput"), titleFont: document.getElementById("titleFontInput"), projectBold: document.getElementById("projectBoldInput"), dateBold: document.getElementById("dateBoldInput"), autoPhase: document.getElementById("autoPhaseInput"), baseFy: document.getElementById("baseFyInput"),
+      projectFont: document.getElementById("projectFontInput"), dateFont: document.getElementById("dateFontInput"), titleFont: document.getElementById("titleFontInput"), categoryFont: document.getElementById("categoryFontInput"), projectBold: document.getElementById("projectBoldInput"), dateBold: document.getElementById("dateBoldInput"), autoPhase: document.getElementById("autoPhaseInput"), baseFy: document.getElementById("baseFyInput"),
       cat1: document.getElementById("cat1Input"), cat2: document.getElementById("cat2Input"), cat3: document.getElementById("cat3Input"), cat4: document.getElementById("cat4Input"),
       phaseInput: document.getElementById("phaseInput"), projectFormTitle: document.getElementById("projectFormTitle"), projectName: document.getElementById("projectName"), projectCategory: document.getElementById("projectCategory"), projectPhase: document.getElementById("projectPhase"), projectDate: document.getElementById("projectDate"), projectNotes: document.getElementById("projectNotes"),
-      addProjectBtn: document.getElementById("addProjectBtn"), cancelEditBtn: document.getElementById("cancelEditBtn"), clearFormBtn: document.getElementById("clearFormBtn"), resetBtn: document.getElementById("resetBtn"), projectList: document.getElementById("projectList"), jsonBox: document.getElementById("jsonBox"), copyJsonBtn: document.getElementById("copyJsonBtn"), loadJsonBtn: document.getElementById("loadJsonBtn")
+      addProjectBtn: document.getElementById("addProjectBtn"), cancelEditBtn: document.getElementById("cancelEditBtn"), clearFormBtn: document.getElementById("clearFormBtn"), resetBtn: document.getElementById("resetBtn"), projectList: document.getElementById("projectList"), jsonBox: document.getElementById("jsonBox"), copyJsonBtn: document.getElementById("copyJsonBtn"), loadJsonBtn: document.getElementById("loadJsonBtn"), exportJpegBtn: document.getElementById("exportJpegBtn"), exportSvgBtn: document.getElementById("exportSvgBtn")
     };
 
     function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
@@ -292,7 +294,7 @@ Future State</textarea>
       return {
         title: els.title.value.trim() || "Transformation Map", subtitle: els.subtitle.value.trim(), currentState: els.current.value.trim() || "Current State", futureState: els.future.value.trim() || "Future State",
         background: els.bg.value, textColour: els.text.value, dateColour: els.date.value, sun: els.sun.value,
-        projectFont: Number(els.projectFont.value || 11), dateFont: Number(els.dateFont.value || 9.5), titleFont: Number(els.titleFont.value || 38), projectBold: els.projectBold.checked, dateBold: els.dateBold.checked, autoPhase: els.autoPhase.checked, baseFy: Number(els.baseFy.value || 26),
+        projectFont: Number(els.projectFont.value || 11), dateFont: Number(els.dateFont.value || 9.5), titleFont: Number(els.titleFont.value || 38), categoryFont: Number(els.categoryFont.value || 11), projectBold: els.projectBold.checked, dateBold: els.dateBold.checked, autoPhase: els.autoPhase.checked, baseFy: Number(els.baseFy.value || 26),
         categories: [els.cat1.value, els.cat2.value, els.cat3.value, els.cat4.value], colours: [els.c1.value, els.c2.value, els.c3.value, els.c4.value], phases: els.phaseInput.value.split("\n").map(x => x.trim()).filter(Boolean).slice(0, 6)
       };
     }
@@ -374,7 +376,7 @@ Future State</textarea>
         const a = startAngle + (i + 0.5) * (endAngle - startAngle) / laneCount;
         const pt = polar(fx, fy, maxR + 8, a);
         const labelY = pt.y;
-        add("text", { x: currentX - 92, y: labelY + 5, fill: cfg.colours[i], "font-size": "13", "font-weight": "850", "text-anchor": "end" }, overlayG).textContent = cat.toUpperCase();
+        add("text", { x: currentX - 92, y: labelY + 5, fill: cfg.colours[i], "font-size": cfg.categoryFont, "font-weight": "850", "text-anchor": "end" }, overlayG).textContent = cat.toUpperCase();
         add("circle", { cx: currentX - 72, cy: labelY, r: 8, fill: cfg.colours[i], opacity: "0.96" }, overlayG);
       });
 
@@ -439,7 +441,7 @@ Future State</textarea>
     function loadState(data) {
       els.title.value = data.title || els.title.value; els.subtitle.value = data.subtitle || ""; els.current.value = data.currentState || data.current || els.current.value; els.future.value = data.futureState || els.future.value;
       els.bg.value = data.background || els.bg.value; els.text.value = data.textColour || els.text.value; els.date.value = data.dateColour || els.date.value; els.sun.value = data.sun || els.sun.value;
-      els.projectFont.value = data.projectFont || els.projectFont.value; els.dateFont.value = data.dateFont || els.dateFont.value; els.titleFont.value = data.titleFont || els.titleFont.value;
+      els.projectFont.value = data.projectFont || els.projectFont.value; els.dateFont.value = data.dateFont || els.dateFont.value; els.titleFont.value = data.titleFont || els.titleFont.value; els.categoryFont.value = data.categoryFont || els.categoryFont.value;
       els.projectBold.checked = !!data.projectBold; els.dateBold.checked = !!data.dateBold; els.autoPhase.checked = data.autoPhase !== undefined ? !!data.autoPhase : els.autoPhase.checked; els.baseFy.value = data.baseFy || els.baseFy.value;
       if (Array.isArray(data.categories)) [els.cat1, els.cat2, els.cat3, els.cat4].forEach((el, i) => el.value = data.categories[i] || el.value);
       if (Array.isArray(data.colours)) [els.c1, els.c2, els.c3, els.c4].forEach((el, i) => el.value = data.colours[i] || el.value);
@@ -463,7 +465,61 @@ Future State</textarea>
     els.copyJsonBtn.addEventListener("click", updateJsonBox);
     els.loadJsonBtn.addEventListener("click", () => { try { loadState(JSON.parse(els.jsonBox.value)); } catch (err) { alert("That JSON could not be loaded. Check commas, brackets and quote marks."); } });
 
-    [els.title, els.subtitle, els.current, els.future, els.bg, els.text, els.date, els.sun, els.c1, els.c2, els.c3, els.c4, els.projectFont, els.dateFont, els.titleFont, els.projectBold, els.dateBold, els.autoPhase, els.baseFy, els.cat1, els.cat2, els.cat3, els.cat4, els.phaseInput].forEach(el => el.addEventListener("input", render));
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportSvg() {
+      const clone = els.chart.cloneNode(true);
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(clone);
+      downloadFile("sunray-roadmap.svg", source, "image/svg+xml;charset=utf-8");
+    }
+
+    function exportJpeg() {
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(els.chart);
+      const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1700;
+        canvas.height = 1080;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = getConfig().background || "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function (blob) {
+          if (!blob) { alert("JPEG export failed in this browser."); return; }
+          const out = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = out;
+          link.download = "sunray-roadmap.jpg";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(out);
+        }, "image/jpeg", 0.94);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); alert("JPEG export failed in this browser. Try Export SVG instead."); };
+      img.src = url;
+    }
+
+    els.exportSvgBtn.addEventListener("click", exportSvg);
+    els.exportJpegBtn.addEventListener("click", exportJpeg);
+
+    [els.title, els.subtitle, els.current, els.future, els.bg, els.text, els.date, els.sun, els.c1, els.c2, els.c3, els.c4, els.projectFont, els.dateFont, els.titleFont, els.categoryFont, els.projectBold, els.dateBold, els.autoPhase, els.baseFy, els.cat1, els.cat2, els.cat3, els.cat4, els.phaseInput].forEach(el => el.addEventListener("input", render));
     [els.projectBold, els.dateBold, els.autoPhase].forEach(el => el.addEventListener("change", render));
     [els.projectDate, els.baseFy, els.autoPhase].forEach(el => el.addEventListener("input", syncPhaseFromDateField));
     els.projectDate.addEventListener("change", syncPhaseFromDateField);
