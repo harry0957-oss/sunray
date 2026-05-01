@@ -1,0 +1,2 @@
+# sunray
+Sunray diagram generator
