@@ -74,6 +74,7 @@
     textarea { min-height: 92px; resize: vertical; line-height: 1.35; }
     input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
     input[type="checkbox"] { width: auto; transform: translateY(2px); }
+    input[type="range"] { padding-left: 0; padding-right: 0; }
 
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
     .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
@@ -158,9 +159,11 @@
         <div class="grid2">
           <div><label>Background</label><input id="bgInput" type="color" value="#071018" /></div>
           <div><label>Text</label><input id="textInput" type="color" value="#ffffff" /></div>
-          <div><label>Date Text</label><input id="dateInput" type="color" value="#d7e4f4" /></div>
+          <div><label>Phase Text</label><input id="phaseTextInput" type="color" value="#d7e4f4" /></div>
           <div><label>Future Sun</label><input id="sunInput" type="color" value="#2f9bff" /></div>
         </div>
+        <label>Sunray Opacity</label>
+        <input id="rayOpacityInput" type="range" min="0.15" max="1" step="0.05" value="0.55" />
         <div class="grid2">
           <div><label>Category 1</label><input id="c1Input" type="color" value="#a855f7" /></div>
           <div><label>Category 2</label><input id="c2Input" type="color" value="#38bdf8" /></div>
@@ -172,13 +175,25 @@
       <div class="section">
         <h3>Text Style</h3>
         <div class="grid3">
-          <div><label>Project Font</label><input id="projectFontInput" type="number" min="8" max="22" value="11" /></div>
-          <div><label>Date Font</label><input id="dateFontInput" type="number" min="7" max="18" value="9.5" step="0.5" /></div>
-          <div><label>Title Font</label><input id="titleFontInput" type="number" min="20" max="60" value="38" /></div>
-          <div><label>Category Font</label><input id="categoryFontInput" type="number" min="8" max="24" value="11" /></div>
+          <div><label>Project Font Size</label><input id="projectFontInput" type="number" min="8" max="22" value="11" /></div>
+          <div><label>Phase Font Size</label><input id="phaseFontInput" type="number" min="7" max="18" value="9.5" step="0.5" /></div>
+          <div><label>Title Font Size</label><input id="titleFontInput" type="number" min="20" max="60" value="38" /></div>
+          <div><label>Category Font Size</label><input id="categoryFontInput" type="number" min="8" max="24" value="11" /></div>
+          <div><label>Subtitle Font Size</label><input id="subtitleFontInput" type="number" min="10" max="32" value="18" /></div>
+          <div><label>Future Font Size</label><input id="futureFontInput" type="number" min="10" max="28" value="15" /></div>
         </div>
+        <label>Title Font</label>
+        <select id="titleFamilyInput"><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Segoe UI, Arial, sans-serif">Segoe UI</option><option value="Calibri, Arial, sans-serif">Calibri</option><option value="Georgia, serif">Georgia</option><option value="Trebuchet MS, Arial, sans-serif">Trebuchet MS</option><option value="Verdana, Arial, sans-serif">Verdana</option></select>
+        <label>Project Font</label>
+        <select id="projectFamilyInput"><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Segoe UI, Arial, sans-serif">Segoe UI</option><option value="Calibri, Arial, sans-serif">Calibri</option><option value="Georgia, serif">Georgia</option><option value="Trebuchet MS, Arial, sans-serif">Trebuchet MS</option><option value="Verdana, Arial, sans-serif">Verdana</option></select>
+        <label>Category Font</label>
+        <select id="categoryFamilyInput"><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Segoe UI, Arial, sans-serif">Segoe UI</option><option value="Calibri, Arial, sans-serif">Calibri</option><option value="Georgia, serif">Georgia</option><option value="Trebuchet MS, Arial, sans-serif">Trebuchet MS</option><option value="Verdana, Arial, sans-serif">Verdana</option></select>
+        <label>Phase Font</label>
+        <select id="phaseFamilyInput"><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Segoe UI, Arial, sans-serif">Segoe UI</option><option value="Calibri, Arial, sans-serif">Calibri</option><option value="Georgia, serif">Georgia</option><option value="Trebuchet MS, Arial, sans-serif">Trebuchet MS</option><option value="Verdana, Arial, sans-serif">Verdana</option></select>
+        <label>Future State Font</label>
+        <select id="futureFamilyInput"><option value="Arial, Helvetica, sans-serif">Arial</option><option value="Segoe UI, Arial, sans-serif">Segoe UI</option><option value="Calibri, Arial, sans-serif">Calibri</option><option value="Georgia, serif">Georgia</option><option value="Trebuchet MS, Arial, sans-serif">Trebuchet MS</option><option value="Verdana, Arial, sans-serif">Verdana</option></select>
         <label class="checkline"><input id="projectBoldInput" type="checkbox" /> Bold project names</label>
-        <label class="checkline"><input id="dateBoldInput" type="checkbox" /> Bold dates</label>
+        <label class="checkline"><input id="dateBoldInput" type="checkbox" /> Bold project dates</label>
         <label class="checkline"><input id="autoPhaseInput" type="checkbox" checked /> Auto-place phase from expected date</label>
         <label>Base FY for Year 1</label>
         <input id="baseFyInput" type="number" min="0" max="99" value="26" />
@@ -222,7 +237,7 @@ Future State</textarea>
         <h3>Export / Import JSON</h3>
         <label>Data JSON</label><textarea id="jsonBox"></textarea>
         <div class="btn-row"><button class="secondary" id="copyJsonBtn">Refresh JSON</button><button class="secondary" id="loadJsonBtn">Load JSON</button></div>
-        <div class="btn-row"><button class="secondary" id="exportJpegBtn">Export JPEG</button><button class="secondary" id="exportSvgBtn">Export SVG</button></div>
+        <div class="btn-row"><button class="secondary" id="exportPngBtn">Export PNG 2x</button><button class="secondary" id="exportSvgBtn">Export SVG</button></div>
       </div>
     </aside>
 
@@ -258,12 +273,14 @@ Future State</textarea>
     const els = {
       chart: document.getElementById("chart"), stage: document.getElementById("stage"), tooltip: document.getElementById("tooltip"),
       title: document.getElementById("titleInput"), subtitle: document.getElementById("subtitleInput"), current: document.getElementById("currentInput"), future: document.getElementById("futureInput"),
-      bg: document.getElementById("bgInput"), text: document.getElementById("textInput"), date: document.getElementById("dateInput"), sun: document.getElementById("sunInput"),
+      bg: document.getElementById("bgInput"), text: document.getElementById("textInput"), phaseText: document.getElementById("phaseTextInput"), sun: document.getElementById("sunInput"), rayOpacity: document.getElementById("rayOpacityInput"),
       c1: document.getElementById("c1Input"), c2: document.getElementById("c2Input"), c3: document.getElementById("c3Input"), c4: document.getElementById("c4Input"),
-      projectFont: document.getElementById("projectFontInput"), dateFont: document.getElementById("dateFontInput"), titleFont: document.getElementById("titleFontInput"), categoryFont: document.getElementById("categoryFontInput"), projectBold: document.getElementById("projectBoldInput"), dateBold: document.getElementById("dateBoldInput"), autoPhase: document.getElementById("autoPhaseInput"), baseFy: document.getElementById("baseFyInput"),
+      projectFont: document.getElementById("projectFontInput"), phaseFont: document.getElementById("phaseFontInput"), titleFont: document.getElementById("titleFontInput"), categoryFont: document.getElementById("categoryFontInput"), subtitleFont: document.getElementById("subtitleFontInput"), futureFont: document.getElementById("futureFontInput"),
+      titleFamily: document.getElementById("titleFamilyInput"), projectFamily: document.getElementById("projectFamilyInput"), categoryFamily: document.getElementById("categoryFamilyInput"), phaseFamily: document.getElementById("phaseFamilyInput"), futureFamily: document.getElementById("futureFamilyInput"),
+      projectBold: document.getElementById("projectBoldInput"), dateBold: document.getElementById("dateBoldInput"), autoPhase: document.getElementById("autoPhaseInput"), baseFy: document.getElementById("baseFyInput"),
       cat1: document.getElementById("cat1Input"), cat2: document.getElementById("cat2Input"), cat3: document.getElementById("cat3Input"), cat4: document.getElementById("cat4Input"),
       phaseInput: document.getElementById("phaseInput"), projectFormTitle: document.getElementById("projectFormTitle"), projectName: document.getElementById("projectName"), projectCategory: document.getElementById("projectCategory"), projectPhase: document.getElementById("projectPhase"), projectDate: document.getElementById("projectDate"), projectNotes: document.getElementById("projectNotes"),
-      addProjectBtn: document.getElementById("addProjectBtn"), cancelEditBtn: document.getElementById("cancelEditBtn"), clearFormBtn: document.getElementById("clearFormBtn"), resetBtn: document.getElementById("resetBtn"), projectList: document.getElementById("projectList"), jsonBox: document.getElementById("jsonBox"), copyJsonBtn: document.getElementById("copyJsonBtn"), loadJsonBtn: document.getElementById("loadJsonBtn"), exportJpegBtn: document.getElementById("exportJpegBtn"), exportSvgBtn: document.getElementById("exportSvgBtn")
+      addProjectBtn: document.getElementById("addProjectBtn"), cancelEditBtn: document.getElementById("cancelEditBtn"), clearFormBtn: document.getElementById("clearFormBtn"), resetBtn: document.getElementById("resetBtn"), projectList: document.getElementById("projectList"), jsonBox: document.getElementById("jsonBox"), copyJsonBtn: document.getElementById("copyJsonBtn"), loadJsonBtn: document.getElementById("loadJsonBtn"), exportPngBtn: document.getElementById("exportPngBtn"), exportSvgBtn: document.getElementById("exportSvgBtn")
     };
 
     function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
@@ -293,8 +310,10 @@ Future State</textarea>
     function getConfig() {
       return {
         title: els.title.value.trim() || "Transformation Map", subtitle: els.subtitle.value.trim(), currentState: els.current.value.trim() || "Current State", futureState: els.future.value.trim() || "Future State",
-        background: els.bg.value, textColour: els.text.value, dateColour: els.date.value, sun: els.sun.value,
-        projectFont: Number(els.projectFont.value || 11), dateFont: Number(els.dateFont.value || 9.5), titleFont: Number(els.titleFont.value || 38), categoryFont: Number(els.categoryFont.value || 11), projectBold: els.projectBold.checked, dateBold: els.dateBold.checked, autoPhase: els.autoPhase.checked, baseFy: Number(els.baseFy.value || 26),
+        background: els.bg.value, textColour: els.text.value, phaseTextColour: els.phaseText.value, sun: els.sun.value, rayOpacity: Number(els.rayOpacity.value || 0.55),
+        projectFont: Number(els.projectFont.value || 11), phaseFont: Number(els.phaseFont.value || 9.5), titleFont: Number(els.titleFont.value || 38), categoryFont: Number(els.categoryFont.value || 11), subtitleFont: Number(els.subtitleFont.value || 18), futureFont: Number(els.futureFont.value || 15),
+        titleFamily: els.titleFamily.value, projectFamily: els.projectFamily.value, categoryFamily: els.categoryFamily.value, phaseFamily: els.phaseFamily.value, futureFamily: els.futureFamily.value,
+        projectBold: els.projectBold.checked, dateBold: els.dateBold.checked, autoPhase: els.autoPhase.checked, baseFy: Number(els.baseFy.value || 26),
         categories: [els.cat1.value, els.cat2.value, els.cat3.value, els.cat4.value], colours: [els.c1.value, els.c2.value, els.c3.value, els.c4.value], phases: els.phaseInput.value.split("\n").map(x => x.trim()).filter(Boolean).slice(0, 6)
       };
     }
@@ -344,14 +363,16 @@ Future State</textarea>
       const glow = add("filter", { id: "glow", x: "-80%", y: "-80%", width: "260%", height: "260%" }, defs);
       add("feGaussianBlur", { stdDeviation: "5", result: "blur" }, glow); const merge = add("feMerge", {}, glow); add("feMergeNode", { in: "blur" }, merge); add("feMergeNode", { in: "SourceGraphic" }, merge);
 
-      const bgGrad = add("radialGradient", { id: "bgGrad", cx: "83%", cy: "10%", r: "95%" }, defs);
-      add("stop", { offset: "0%", "stop-color": cfg.sun, "stop-opacity": "0.20" }, bgGrad); add("stop", { offset: "58%", "stop-color": cfg.background, "stop-opacity": "0.93" }, bgGrad); add("stop", { offset: "100%", "stop-color": cfg.background, "stop-opacity": "1" }, bgGrad);
+      const sunGlow = add("radialGradient", { id: "sunGlow", cx: "96%", cy: "38%", r: "75%" }, defs);
+      add("stop", { offset: "0%", "stop-color": cfg.sun, "stop-opacity": "0.28" }, sunGlow);
+      add("stop", { offset: "55%", "stop-color": cfg.sun, "stop-opacity": "0.08" }, sunGlow);
+      add("stop", { offset: "100%", "stop-color": cfg.sun, "stop-opacity": "0" }, sunGlow);
 
-      cfg.colours.forEach((colour, idx) => { const grad = add("linearGradient", { id: `laneGrad${idx}`, x1: "0%", y1: "55%", x2: "100%", y2: "0%" }, defs); add("stop", { offset: "0%", "stop-color": colour, "stop-opacity": "0.10" }, grad); add("stop", { offset: "68%", "stop-color": colour, "stop-opacity": "0.28" }, grad); add("stop", { offset: "100%", "stop-color": colour, "stop-opacity": "0.50" }, grad); });
+      cfg.colours.forEach((colour, idx) => { const grad = add("linearGradient", { id: `laneGrad${idx}`, x1: "0%", y1: "55%", x2: "100%", y2: "0%" }, defs); add("stop", { offset: "0%", "stop-color": colour, "stop-opacity": "0.30" }, grad); add("stop", { offset: "68%", "stop-color": colour, "stop-opacity": "0.68" }, grad); add("stop", { offset: "100%", "stop-color": colour, "stop-opacity": "0.95" }, grad); });
 
-      add("rect", { width: "1700", height: "1080", fill: "url(#bgGrad)" });
-      add("text", { x: 66, y: 76, fill: cfg.textColour, "font-size": cfg.titleFont, "font-weight": "900", "letter-spacing": "0.1" }).textContent = cfg.title;
-      if (cfg.subtitle) add("text", { x: 68, y: 112, fill: cfg.textColour, opacity: "0.72", "font-size": "18" }).textContent = cfg.subtitle;
+      add("rect", { width: "1700", height: "1080", fill: cfg.background });
+      add("text", { x: 66, y: 76, fill: cfg.textColour, "font-size": cfg.titleFont, "font-weight": "900", "letter-spacing": "0.1", "font-family": cfg.titleFamily }).textContent = cfg.title;
+      if (cfg.subtitle) add("text", { x: 68, y: 112, fill: cfg.textColour, opacity: "0.72", "font-size": cfg.subtitleFont, "font-family": cfg.titleFamily }).textContent = cfg.subtitle;
 
       const clip = add("clipPath", { id: "diagramClip" }, defs); add("rect", { x: "250", y: "120", width: "1265", height: "710" }, clip);
       const mapG = add("g", { transform: "translate(0,0)", "clip-path": "url(#diagramClip)" }); const overlayG = add("g", { transform: "translate(0,0)" });
@@ -360,28 +381,30 @@ Future State</textarea>
       const midAngle = startAngle + (endAngle - startAngle) / 2;
       const rayOrigin = polar(fx, fy, minR, midAngle);
 
-      for (let i = 0; i < laneCount; i++) { const a1 = startAngle + (i * (endAngle - startAngle) / laneCount); const a2 = startAngle + ((i + 1) * (endAngle - startAngle) / laneCount); add("path", { d: bandPath(fx, fy, minR, maxR, a1, a2), fill: `url(#laneGrad${i})`, stroke: cfg.colours[i], "stroke-opacity": "0.14", "stroke-width": "0.6" }, mapG); }
+      const bandPaths = [];
+      for (let i = 0; i < laneCount; i++) {
+        const a1 = startAngle + (i * (endAngle - startAngle) / laneCount);
+        const a2 = startAngle + ((i + 1) * (endAngle - startAngle) / laneCount);
+        const d = bandPath(fx, fy, minR, maxR, a1, a2);
+        bandPaths.push(d);
+        add("path", { d, fill: "url(#sunGlow)", opacity: "1" }, mapG);
+        add("path", { d, fill: `url(#laneGrad${i})`, opacity: cfg.rayOpacity, stroke: cfg.colours[i], "stroke-opacity": "0.14", "stroke-width": "0.6" }, mapG);
+      }
       for (let p = 1; p <= phaseCount; p++) { const r = minR + p * step; const opacity = Math.max(0.10, 0.44 - p * 0.05); add("path", { d: arcPath(fx, fy, r, startAngle, endAngle), fill: "none", stroke: `rgba(168,85,247,${opacity})`, "stroke-width": p === phaseCount ? "1.35" : "1", "stroke-dasharray": p === phaseCount ? "" : "6 9" }, mapG); }
       for (let i = 0; i <= laneCount; i++) { const a = startAngle + i * (endAngle - startAngle) / laneCount; const p1 = polar(fx, fy, minR, a), p2 = polar(fx, fy, maxR, a); add("line", { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, stroke: "rgba(255,255,255,0.13)", "stroke-width": "0.8" }, mapG); }
 
       add("circle", { cx: fx, cy: fy, r: 58, fill: "rgba(9,13,36,0.98)", stroke: cfg.sun, "stroke-width": "4", filter: "url(#glow)" }, overlayG);
-      wrapText(cfg.futureState.toUpperCase(), 13, 3).forEach((line, idx, arr) => { add("text", { x: fx, y: fy - ((arr.length - 1) * 10) + idx * 21, fill: "white", "font-size": "15", "font-weight": "900", "text-anchor": "middle" }, overlayG).textContent = line; });
+      wrapText(cfg.futureState.toUpperCase(), 13, 3).forEach((line, idx, arr) => { add("text", { x: fx, y: fy - ((arr.length - 1) * 10) + idx * 21, fill: "white", "font-size": cfg.futureFont, "font-weight": "900", "text-anchor": "middle", "font-family": cfg.futureFamily }, overlayG).textContent = line; });
 
       const currentX = 250, currentY = 485;
       add("line", { x1: currentX, y1: 170, x2: currentX, y2: 790, stroke: cfg.textColour, opacity: "0.32", "stroke-width": "1.5" }, overlayG);
       const currentLabelX = currentX - 18;
-      add("text", { x: currentLabelX, y: currentY, fill: cfg.textColour, opacity: "0.76", "font-size": "13", "font-weight": "850", "text-anchor": "middle", transform: `rotate(-90 ${currentLabelX} ${currentY})` }, overlayG).textContent = cfg.currentState.toUpperCase();
+      add("text", { x: currentLabelX, y: currentY, fill: cfg.textColour, opacity: "0.76", "font-size": "13", "font-weight": "850", "text-anchor": "middle", transform: `rotate(-90 ${currentLabelX} ${currentY})`, "font-family": cfg.categoryFamily }, overlayG).textContent = cfg.currentState.toUpperCase();
 
-      cfg.categories.forEach((cat, i) => {
-        const a = startAngle + (i + 0.5) * (endAngle - startAngle) / laneCount;
-        const pt = polar(fx, fy, maxR + 8, a);
-        const labelY = pt.y;
-        add("text", { x: currentX - 92, y: labelY + 5, fill: cfg.colours[i], "font-size": cfg.categoryFont, "font-weight": "850", "text-anchor": "end" }, overlayG).textContent = cat.toUpperCase();
-        add("circle", { cx: currentX - 72, cy: labelY, r: 8, fill: cfg.colours[i], opacity: "0.96" }, overlayG);
-      });
+      cfg.categories.forEach((cat, i) => { const a = startAngle + (i + 0.5) * (endAngle - startAngle) / laneCount; const pt = polar(fx, fy, maxR + 8, a); const labelY = pt.y; add("text", { x: currentX - 92, y: labelY + 5, fill: cfg.colours[i], "font-size": cfg.categoryFont, "font-weight": "850", "text-anchor": "end", "font-family": cfg.categoryFamily }, overlayG).textContent = cat.toUpperCase(); add("circle", { cx: currentX - 72, cy: labelY, r: 8, fill: cfg.colours[i], opacity: "0.96" }, overlayG); });
 
       const axisG = add("g", { transform: "translate(0,0)" }, overlayG);
-      for (let p = 1; p <= phaseCount; p++) { const r = minR + (phaseCount - p + 0.5) * step; const axisPt = polar(fx, fy, r, axisAngle); const x = axisPt.x; add("line", { x1: x, y1: 840, x2: x, y2: 874, stroke: cfg.textColour, opacity: "0.12", "stroke-dasharray": "3 5" }, axisG); add("circle", { cx: x, cy: 838, r: 4, fill: cfg.background, stroke: cfg.sun, "stroke-opacity": "0.65" }, axisG); const phaseLabel = cfg.phases[p - 1] || `Phase ${p}`; wrapText(phaseLabel, 13, 2).forEach((line, idx) => add("text", { x, y: 864 + idx * 14, fill: cfg.sun, "font-size": "10.5", "font-weight": "800", "text-anchor": "middle" }, axisG).textContent = line.toUpperCase()); }
+      for (let p = 1; p <= phaseCount; p++) { const r = minR + (phaseCount - p + 0.5) * step; const axisPt = polar(fx, fy, r, axisAngle); const x = axisPt.x; add("line", { x1: x, y1: 840, x2: x, y2: 874, stroke: cfg.textColour, opacity: "0.12", "stroke-dasharray": "3 5" }, axisG); add("circle", { cx: x, cy: 838, r: 4, fill: cfg.background, stroke: cfg.phaseTextColour, "stroke-opacity": "0.65" }, axisG); const phaseLabel = cfg.phases[p - 1] || `Phase ${p}`; wrapText(phaseLabel, 13, 2).forEach((line, idx) => add("text", { x, y: 864 + idx * 14, fill: cfg.phaseTextColour, "font-size": cfg.phaseFont, "font-weight": "800", "text-anchor": "middle", "font-family": cfg.phaseFamily }, axisG).textContent = line.toUpperCase()); }
 
       const grouped = new Map();
       projects.forEach((project) => { const ep = effectivePhase(project, cfg); project._effectivePhase = ep; const key = `${project.category}-${ep}`; if (!grouped.has(key)) grouped.set(key, []); grouped.get(key).push(project); });
@@ -409,10 +432,10 @@ Future State</textarea>
         const anchor = toRight ? "start" : "end";
         const lineHeight = cfg.projectFont + 2;
         const nameLines = wrapText(project.name, 18, 2);
-        const totalTextHeight = (nameLines.length * lineHeight) + cfg.dateFont + 2;
+        const totalTextHeight = (nameLines.length * lineHeight) + cfg.phaseFont + 2;
         const firstLineY = pt.y - (totalTextHeight / 2) + cfg.projectFont;
-        nameLines.forEach((line, idx) => add("text", { x: labelX, y: firstLineY + idx * lineHeight, fill: cfg.textColour, opacity: "0.94", "font-size": cfg.projectFont, "font-weight": cfg.projectBold ? "850" : "500", "text-anchor": anchor }, mapG).textContent = line);
-        add("text", { x: labelX, y: firstLineY + nameLines.length * lineHeight + 1, fill: cfg.textColour, opacity: "0.78", "font-size": cfg.dateFont, "font-weight": cfg.dateBold ? "850" : "500", "text-anchor": anchor }, mapG).textContent = project.date || `Phase ${phase}`;
+        nameLines.forEach((line, idx) => add("text", { x: labelX, y: firstLineY + idx * lineHeight, fill: cfg.textColour, opacity: "0.94", "font-size": cfg.projectFont, "font-weight": cfg.projectBold ? "850" : "500", "text-anchor": anchor, "font-family": cfg.projectFamily }, mapG).textContent = line);
+        add("text", { x: labelX, y: firstLineY + nameLines.length * lineHeight + 1, fill: cfg.textColour, opacity: "0.78", "font-size": cfg.phaseFont, "font-weight": cfg.dateBold ? "850" : "500", "text-anchor": anchor, "font-family": cfg.projectFamily }, mapG).textContent = project.date || `Phase ${phase}`;
       });
 
       updateProjectList(); updateJsonBox();
@@ -440,8 +463,9 @@ Future State</textarea>
     function updateJsonBox() { els.jsonBox.value = JSON.stringify(getState(), null, 2); }
     function loadState(data) {
       els.title.value = data.title || els.title.value; els.subtitle.value = data.subtitle || ""; els.current.value = data.currentState || data.current || els.current.value; els.future.value = data.futureState || els.future.value;
-      els.bg.value = data.background || els.bg.value; els.text.value = data.textColour || els.text.value; els.date.value = data.dateColour || els.date.value; els.sun.value = data.sun || els.sun.value;
-      els.projectFont.value = data.projectFont || els.projectFont.value; els.dateFont.value = data.dateFont || els.dateFont.value; els.titleFont.value = data.titleFont || els.titleFont.value; els.categoryFont.value = data.categoryFont || els.categoryFont.value;
+      els.bg.value = data.background || els.bg.value; els.text.value = data.textColour || els.text.value; els.phaseText.value = data.phaseTextColour || data.dateColour || els.phaseText.value; els.sun.value = data.sun || els.sun.value; els.rayOpacity.value = data.rayOpacity || els.rayOpacity.value;
+      els.projectFont.value = data.projectFont || els.projectFont.value; els.phaseFont.value = data.phaseFont || data.dateFont || els.phaseFont.value; els.titleFont.value = data.titleFont || els.titleFont.value; els.categoryFont.value = data.categoryFont || els.categoryFont.value; els.subtitleFont.value = data.subtitleFont || els.subtitleFont.value; els.futureFont.value = data.futureFont || els.futureFont.value;
+      els.titleFamily.value = data.titleFamily || els.titleFamily.value; els.projectFamily.value = data.projectFamily || els.projectFamily.value; els.categoryFamily.value = data.categoryFamily || els.categoryFamily.value; els.phaseFamily.value = data.phaseFamily || els.phaseFamily.value; els.futureFamily.value = data.futureFamily || els.futureFamily.value;
       els.projectBold.checked = !!data.projectBold; els.dateBold.checked = !!data.dateBold; els.autoPhase.checked = data.autoPhase !== undefined ? !!data.autoPhase : els.autoPhase.checked; els.baseFy.value = data.baseFy || els.baseFy.value;
       if (Array.isArray(data.categories)) [els.cat1, els.cat2, els.cat3, els.cat4].forEach((el, i) => el.value = data.categories[i] || el.value);
       if (Array.isArray(data.colours)) [els.c1, els.c2, els.c3, els.c4].forEach((el, i) => el.value = data.colours[i] || el.value);
@@ -458,13 +482,6 @@ Future State</textarea>
       clearProjectForm(); render();
     }
 
-    els.addProjectBtn.addEventListener("click", saveProjectFromForm);
-    els.cancelEditBtn.addEventListener("click", clearProjectForm);
-    els.clearFormBtn.addEventListener("click", clearProjectForm);
-    els.resetBtn.addEventListener("click", () => { projects = JSON.parse(JSON.stringify(sampleProjects)); clearProjectForm(); render(); });
-    els.copyJsonBtn.addEventListener("click", updateJsonBox);
-    els.loadJsonBtn.addEventListener("click", () => { try { loadState(JSON.parse(els.jsonBox.value)); } catch (err) { alert("That JSON could not be loaded. Check commas, brackets and quote marks."); } });
-
     function downloadFile(filename, content, type) {
       const blob = new Blob([content], { type });
       const url = URL.createObjectURL(blob);
@@ -477,50 +494,62 @@ Future State</textarea>
       URL.revokeObjectURL(url);
     }
 
-    function exportSvg() {
+    function serialiseSvg() {
       const clone = els.chart.cloneNode(true);
       clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-      const serializer = new XMLSerializer();
-      const source = serializer.serializeToString(clone);
-      downloadFile("sunray-roadmap.svg", source, "image/svg+xml;charset=utf-8");
+      clone.setAttribute("width", "1700");
+      clone.setAttribute("height", "1080");
+      const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      style.textContent = `text { text-rendering: geometricPrecision; }`;
+      clone.insertBefore(style, clone.firstChild);
+      return new XMLSerializer().serializeToString(clone);
     }
 
-    function exportJpeg() {
-      const serializer = new XMLSerializer();
-      const source = serializer.serializeToString(els.chart);
+    function exportSvg() { downloadFile("sunray-roadmap.svg", serialiseSvg(), "image/svg+xml;charset=utf-8"); }
+
+    function exportPng() {
+      const source = serialiseSvg();
       const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
       img.onload = function () {
+        const scale = 2;
         const canvas = document.createElement("canvas");
-        canvas.width = 1700;
-        canvas.height = 1080;
+        canvas.width = 1700 * scale;
+        canvas.height = 1080 * scale;
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = getConfig().background || "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
         ctx.drawImage(img, 0, 0);
         URL.revokeObjectURL(url);
         canvas.toBlob(function (blob) {
-          if (!blob) { alert("JPEG export failed in this browser."); return; }
+          if (!blob) { alert("PNG export failed in this browser."); return; }
           const out = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = out;
-          link.download = "sunray-roadmap.jpg";
+          link.download = "sunray-roadmap.png";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
           URL.revokeObjectURL(out);
-        }, "image/jpeg", 0.94);
+        }, "image/png");
       };
-      img.onerror = function () { URL.revokeObjectURL(url); alert("JPEG export failed in this browser. Try Export SVG instead."); };
+      img.onerror = function () { URL.revokeObjectURL(url); alert("PNG export failed in this browser. Try Export SVG instead."); };
       img.src = url;
     }
 
+    els.addProjectBtn.addEventListener("click", saveProjectFromForm);
+    els.cancelEditBtn.addEventListener("click", clearProjectForm);
+    els.clearFormBtn.addEventListener("click", clearProjectForm);
+    els.resetBtn.addEventListener("click", () => { projects = JSON.parse(JSON.stringify(sampleProjects)); clearProjectForm(); render(); });
+    els.copyJsonBtn.addEventListener("click", updateJsonBox);
+    els.loadJsonBtn.addEventListener("click", () => { try { loadState(JSON.parse(els.jsonBox.value)); } catch (err) { alert("That JSON could not be loaded. Check commas, brackets and quote marks."); } });
     els.exportSvgBtn.addEventListener("click", exportSvg);
-    els.exportJpegBtn.addEventListener("click", exportJpeg);
+    els.exportPngBtn.addEventListener("click", exportPng);
 
-    [els.title, els.subtitle, els.current, els.future, els.bg, els.text, els.date, els.sun, els.c1, els.c2, els.c3, els.c4, els.projectFont, els.dateFont, els.titleFont, els.categoryFont, els.projectBold, els.dateBold, els.autoPhase, els.baseFy, els.cat1, els.cat2, els.cat3, els.cat4, els.phaseInput].forEach(el => el.addEventListener("input", render));
-    [els.projectBold, els.dateBold, els.autoPhase].forEach(el => el.addEventListener("change", render));
+    [els.title, els.subtitle, els.current, els.future, els.bg, els.text, els.phaseText, els.sun, els.rayOpacity, els.c1, els.c2, els.c3, els.c4, els.projectFont, els.phaseFont, els.titleFont, els.categoryFont, els.subtitleFont, els.futureFont, els.titleFamily, els.projectFamily, els.categoryFamily, els.phaseFamily, els.futureFamily, els.projectBold, els.dateBold, els.autoPhase, els.baseFy, els.cat1, els.cat2, els.cat3, els.cat4, els.phaseInput].forEach(el => el.addEventListener("input", render));
+    [els.projectBold, els.dateBold, els.autoPhase, els.titleFamily, els.projectFamily, els.categoryFamily, els.phaseFamily, els.futureFamily].forEach(el => el.addEventListener("change", render));
     [els.projectDate, els.baseFy, els.autoPhase].forEach(el => el.addEventListener("input", syncPhaseFromDateField));
     els.projectDate.addEventListener("change", syncPhaseFromDateField);
 
